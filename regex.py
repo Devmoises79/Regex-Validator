@@ -3,10 +3,13 @@ import csv
 from datetime import datetime
 
 def validar_nome(nome):
-    return re.match(r"^[A-Za-zÀ-ÿ\s]+$", nome)
+    if not re.match(r"^[A-Za-zÀ-ÿ\s]+$", nome):
+        return False
+    # Verifica se tem pelo menos duas palavras
+    return len(nome.strip().split()) >= 2
 
 def validar_email(email):
-    return re.match(r'^[a-zA-Z]+[0-9]+@gmail\.com$', email)
+    return re.match(r'^[a-zA-Z\.]+[0-9]+@gmail\.com$', email)
 
 def validar_telefone(telefone):
     telefone_limpo = re.sub(r"\D", "", telefone)
@@ -19,8 +22,8 @@ def validar_cpf(cpf):
 
     def calc_digito(digs):
         soma = sum(int(d)*w for d, w in zip(digs, range(len(digs)+1, 1, -1)))
-        resto = (soma * 10) % 11
-        return str(resto if resto < 10 else 0)
+        resto = soma % 11
+        return '0' if resto < 2 else str(11 - resto)
 
     dig1 = calc_digito(cpf[:9])
     dig2 = calc_digito(cpf[:9] + dig1)
@@ -49,11 +52,35 @@ def obter_dado(campo, funcao_validacao, mensagem_erro, formato_exemplo=""):
 def main():
     print("\n--- Validador de Formulário ---\n")
 
-    nome = obter_dado("nome completo", validar_nome, "Nome inválido. Use apenas letras e espaços (ex: João Silva).")
-    email = obter_dado("email", validar_email, "Email inválido. Use o formato: seunome123@gmail.com", " (formato: seunome123@gmail.com)")
-    telefone = obter_dado("telefone", validar_telefone, "Telefone inválido. Use 10 ou 11 dígitos (ex: 99999-0000).", " (com ou sem hífen)")
-    cpf = obter_dado("CPF", validar_cpf, "CPF inválido.", " (somente números ou com pontuação)")
-    data_nasc = obter_dado("data de nascimento", validar_data, "Data inválida. Use o formato DD/MM/AAAA.", " (formato: DD/MM/AAAA)")
+    nome = obter_dado(
+        "nome completo", 
+        validar_nome, 
+        "Nome inválido. Use apenas letras e espaços e ao menos um sobrenome (ex: João Silva)."
+    )
+    email = obter_dado(
+        "email", 
+        validar_email, 
+        "Email inválido. Use o formato: seunome123@gmail.com", 
+        " (formato: seunome123@gmail.com)"
+    )
+    telefone = obter_dado(
+        "telefone", 
+        validar_telefone, 
+        "Telefone inválido. Use 10 ou 11 dígitos (ex: 99999-0000).", 
+        " (com ou sem hífen)"
+    )
+    cpf = obter_dado(
+        "CPF", 
+        validar_cpf, 
+        "CPF inválido.", 
+        " (somente números ou com pontuação)"
+    )
+    data_nasc = obter_dado(
+        "data de nascimento", 
+        validar_data, 
+        "Data inválida. Use o formato DD/MM/AAAA.", 
+        " (formato: DD/MM/AAAA)"
+    )
     idade = calcular_idade(data_nasc)
 
     print("\n✅ Dados validados com sucesso!")
